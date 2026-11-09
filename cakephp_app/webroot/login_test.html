@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Login JWT (CakePHP)</title>
+</head>
+<body>
+  <h1>Test Login JWT (CakePHP)</h1>
+
+  <p>
+    Username:
+    <input id="user" value="mahdi">
+  </p>
+  <p>
+    Password:
+    <input id="pass" type="password" value="123456">
+  </p>
+
+  <button id="loginBtn">Fai login</button>
+
+  <h2>Risposta del server:</h2>
+  <pre id="output"></pre>
+
+  <script>
+    const btn = document.getElementById('loginBtn');
+    const out = document.getElementById('output');
+
+    btn.addEventListener('click', async () => {
+      const username = document.getElementById('user').value;
+      const password = document.getElementById('pass').value;
+
+      out.textContent = 'Invio...';
+
+      try {
+        // ⚠️ URL RELATIVO: usa sempre lo stesso host/porta della pagina
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const text = await res.text();
+        out.textContent = text;
+      } catch (err) {
+        out.textContent = 'Errore: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>

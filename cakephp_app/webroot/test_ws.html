@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Test WebSocket + JWT</title>
+</head>
+<body>
+    <h1>Test WebSocket + JWT</h1>
+
+    <ul id="messages"></ul>
+
+    <h2>1. Incolla il token JWT (da login_test.html)</h2>
+    <textarea id="token" rows="5" cols="80" placeholder="Incolla qui il token JWT"></textarea><br>
+    <button id="authBtn">Autentica con JWT</button>
+
+    <h2>2. Invia un messaggio dopo l'autenticazione</h2>
+    <input id="text" placeholder="Messaggio..." />
+    <button id="sendBtn">Invia messaggio</button>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8081'); // stessa porta di server.js
+
+        const list = document.getElementById('messages');
+        const tokenInput = document.getElementById('token');
+        const textInput = document.getElementById('text');
+        const authBtn = document.getElementById('authBtn');
+        const sendBtn = document.getElementById('sendBtn');
+
+        function addLine(text) {
+            const li = document.createElement('li');
+            li.textContent = text;
+            list.appendChild(li);
+        }
+
+        socket.onopen = () => {
+            addLine('✅ WebSocket connesso');
+        };
+
+        socket.onmessage = (event) => {
+            addLine('📥 dal server: ' + event.data);
+        };
+
+        // 1️⃣ manda il token JWT al server Node
+        authBtn.onclick = () => {
+            const token = tokenInput.value.trim();
+            if (!token) {
+                addLine('⚠️ Inserisci un token JWT prima di autenticarti.');
+                return;
+            }
+
+            const msg = {
+                type: 'auth',
+                token: token,
+            };
+
+            socket.send(JSON.stringify(msg));
+            addLine('📤 inviato (auth): ' + JSON.stringify(msg));
+        };
+
+        // 2️⃣ invia un messaggio dopo che il server ha accettato il token
+        sendBtn.onclick = () => {
+            const content = textInput.value.trim() || 'messaggio di test';
+
+            const msg = {
+                type: 'message',
+                content: content,
+            };
+
+            socket.send(JSON.stringify(msg));
+            addLine('📤 inviato (message): ' + JSON.stringify(msg));
+            textInput.value = '';
+        };
+    </script>
+</body>
+</html>
